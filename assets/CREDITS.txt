@@ -1,0 +1,10 @@
+# 법적 표기 필수 항목 없음 (전부 CC0 또는 OFL). 아래는 호의로 넣는 크레딧.
+UI Pack, Interface Sounds, UI SFX Set by Kenney (www.kenney.nl), CC0
+"Bell dings/chimes" by PWL, CC0 (https://opengameart.org/content/bell-dingschimes)
+"Completion sound." by Brandon Morris, CC0 (https://opengameart.org/content/completion-sound)
+"Frog Croaks" by EZduzziteh, CC0 (https://opengameart.org/content/frog-croaks)
+"Feel good island" by Brandon75689, CC0 (https://opengameart.org/content/feel-good-island)
+"Jua" by The Jua Project Authors (Woowahan Brothers), SIL Open Font License 1.1 (https://github.com/google/fonts/tree/main/ofl/jua)
+"pleasing bell sound effect" by Spring Spring, CC0 (https://opengameart.org/content/pleasing-bell-sound-effect)
+"trying to unlock sound" by pauliuw, CC0 (https://opengameart.org/content/trying-to-unlock-sound)
+"Ice breaking/shattering" by IgnasD, CC0 (https://opengameart.org/content/ice-breakingshattering)

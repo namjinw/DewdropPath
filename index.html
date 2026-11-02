@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>이슬 길 - Dewdrop Path</title>
+  <meta name="description" content="이슬방울을 밀어 길을 이어 주는 슬라이드 퍼즐. 170개 스테이지를 풀며 정원을 가꿔요. A cozy slide puzzle: guide the dewdrop through 170 stages and grow your garden.">
+  <meta name="theme-color" content="#233F33">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="이슬 길 - Dewdrop Path">
+  <meta property="og:description" content="이슬방울을 밀어 길을 이어 주는 슬라이드 퍼즐. 170개 스테이지를 풀며 정원을 가꿔요.">
+  <meta property="og:image" content="og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    @font-face { font-family: "Jua"; src: url("assets/fonts/jua.woff2") format("woff2"); font-display: block; }
+    html, body { margin: 0; height: 100%; background: #233F33; overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+    body { background: radial-gradient(ellipse at 50% 40%, #3D6B55 0%, #233F33 70%); font-family: "Jua", sans-serif; }
+    #app { display: flex; flex-direction: column; height: 100%; }
+    #game { flex: 1; min-height: 0; }
+    #game canvas { display: block; }
+    /* 광고 영역: 게임 영역과 분리(캔버스 바깥). 결과 화면에서만 보이고 플레이를 가리지 않는다. */
+    #ad-slot { height: 66px; display: none; align-items: center; justify-content: center; flex: none; }
+    #ad-slot .ad-box { width: 320px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;
+               border: 2px dashed rgba(255,255,255,.55); background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); font: 16px "Jua", sans-serif; letter-spacing: 1px; }
+    #ad-slot .ad-box.live { border: 0; background: none; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="game"></div>
+    <div id="ad-slot" data-slot="bottom"><div class="ad-box">AD 320 x 50</div></div>
+  </div>
+  <script src="lib/phaser.min.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
