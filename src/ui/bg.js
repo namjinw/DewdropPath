@@ -1,7 +1,7 @@
 // 배경 (2-2, theme.zones): 하늘 + 먼 산 + 덤불(x ±6px 12000ms) + 앞 잎(x ±10px 9000ms) + 구름 + 떠다니는 입자.
 // 보드 테마(R39)를 적용하면 하늘 색과 입자만 바뀐다 (칸 요소 그림은 불변).
 import { THEME } from '../theme.js';
-import { bake, bakeZone, dropZone, hexNum } from '../art.js';
+import { bake, bakeZone, dropZone, hexNum, BG_CROP } from '../art.js';
 import { appliedTheme } from '../save.js';
 import { limits } from '../perf.js';
 
@@ -53,7 +53,7 @@ export class Backdrop {
     }
     const D = THEME.depth;
     this.sky = scene.add.image(270, 480, skyKey).setDepth(D.bg);
-    this.far = scene.add.image(270, 480, `bg_far_${this.zone}`).setDepth(D.bg + 1);
+    this.far = scene.add.image(270, BG_CROP.far.y + BG_CROP.far.h / 2, `bg_far_${this.zone}`).setDepth(D.bg + 1);
     this.clouds = [];
     for (const [x, y, w] of (o.clouds || [])) {
       const c = scene.add.image(x + w / 2, y + (w * 171) / 256 / 2, 'cloud').setDisplaySize(w, Math.round((w * 171) / 256)).setAlpha(0.92).setDepth(D.bg + 2);
@@ -61,8 +61,8 @@ export class Backdrop {
       // 구름은 아주 느리게 오른쪽으로 흐른다 (cloudDrift 60000ms)
       scene.tweens.add({ targets: c, x: c.x + 40, duration: M.cloudDrift / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
-    this.mid = scene.add.image(270, 480, `bg_mid_${this.zone}`).setDepth(D.bg + 3);
-    this.front = scene.add.image(270, 480, `bg_front_${this.zone}`).setDepth(D.mid + 1);
+    this.mid = scene.add.image(270, BG_CROP.mid.y + BG_CROP.mid.h / 2, `bg_mid_${this.zone}`).setDepth(D.bg + 3);
+    this.front = scene.add.image(270, BG_CROP.front.y + BG_CROP.front.h / 2, `bg_front_${this.zone}`).setDepth(D.mid + 1);
     this.mid.x = 270 - 6;
     this.front.x = 270 - 10;
     scene.tweens.add({ targets: this.mid, x: 270 + 6, duration: M.bgMid, yoyo: true, repeat: -1, ease: THEME.easing.bgMid });
