@@ -43,6 +43,21 @@ function vGrad(ctx, y0, y1, c0, c1) {
   return g;
 }
 
+// 글로우 알약(theme.glow[kind]): 글로우 색의 번짐만 남긴 nineslice 용 텍스처 (필터 글로우 대신). 96x96 에 모서리 36, 도형 가장자리는 24
+export function bakeGlowBlob(scene, kind) {
+  const key = `glow_blob_${kind}`;
+  const g = THEME.glow[kind];
+  bake(scene, key, 96, 96, (ctx) => {
+    const n = hexNum(g.color);
+    ctx.shadowColor = `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},1)`;
+    // 그림자 오프셋과 번짐은 캔버스 변환(2배)의 영향을 받지 않는 실제 픽셀 값이다
+    ctx.shadowBlur = (6 + g.outerStrength) * ART_SCALE; ctx.shadowOffsetX = 1000 * ART_SCALE;
+    ctx.fillStyle = '#000';
+    for (let i = 0; i < 2; i++) { roundRect(ctx, 24 - 1000, 24, 48, 48, 14); ctx.fill(); }
+  });
+  return key;
+}
+
 // ---- pastelize 굽기 ----
 // W3C feColorMatrix saturate(s) 다음에 c = c * (1 - l) + l. 알파는 그대로. 반환: 새 텍스처 키
 export function pastelize(scene, key, s, l, suffix = '@pastel') {
