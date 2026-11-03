@@ -250,6 +250,11 @@ export function bakePills(scene) {
 }
 
 // ---- 챕터 배경: 하늘 + 먼 산 + 덤불 + 앞 잎 (theme.zones, 3층 구성은 모든 챕터가 같고 색만 바뀐다) ----
+// 배경 층의 내용이 있는 세로 범위. 전체 화면(540x960)으로 구우면 대부분이 투명한데도 층마다 화면 전체를 그려서,
+// 설정/스테이지 선택처럼 겹침이 많은 화면이 느렸다. 내용이 있는 띠만 구워 그리는 픽셀 수를 줄인다 (모양은 그대로).
+// y: 화면 위에서의 시작, h: 높이. 경로 좌표의 최소/최대 y 에 여유를 두었다.
+export const BG_CROP = { far: { y: 260, h: 300 }, mid: { y: 380, h: 150 }, front: { y: 790, h: 170 } };
+
 export function bakeZone(scene, zone) {
   const z = T.zones[zone];
   const [g0, g1] = z.ground;
@@ -258,21 +263,22 @@ export function bakeZone(scene, zone) {
     g.addColorStop(0, z.sky[0]); g.addColorStop(0.26, z.sky[1]); g.addColorStop(0.4, z.sky[2]); g.addColorStop(0.62, g0); g.addColorStop(1, g1);
     ctx.fillStyle = g; ctx.fillRect(0, 0, 540, 960);
   }, 1);
-  bake(scene, `bg_far_${zone}`, 540, 960, (ctx) => {
+  bake(scene, `bg_far_${zone}`, 540, BG_CROP.far.h, (ctx) => {
+    ctx.translate(0, -BG_CROP.far.y);
     ctx.globalAlpha = 0.55; ctx.fillStyle = z.far[1];
     ctx.fill(new Path2D('M-20 360 Q40 300 100 330 Q150 280 210 320 Q260 290 310 318 Q370 270 430 312 Q490 286 560 330 V520 H-20 Z'));
     ctx.globalAlpha = 0.75; ctx.fillStyle = z.far[0];
     ctx.fill(new Path2D('M-20 392 Q50 350 120 372 Q190 340 250 366 Q320 336 390 362 Q460 338 560 370 V560 H-20 Z'));
   }, 1);
-  bake(scene, `bg_mid_${zone}`, 600, 960, (ctx) => {
-    ctx.translate(30, 0);
+  bake(scene, `bg_mid_${zone}`, 600, BG_CROP.mid.h, (ctx) => {
+    ctx.translate(30, -BG_CROP.mid.y);
     ctx.fillStyle = z.hedge[0];
     ctx.fill(new Path2D('M-30 430 q30 -34 64 -6 q26 -30 60 -4 q30 -32 64 -2 q28 -30 62 -4 q30 -30 64 -2 q28 -28 62 -2 q30 -30 64 0 q24 -24 56 0 V500 H-30 Z'));
     ctx.globalAlpha = 0.55; ctx.fillStyle = z.hedge[1];
     ctx.fill(new Path2D('M-30 462 q40 -22 80 -4 q40 -22 84 -2 q40 -20 84 0 q40 -22 84 -2 q40 -20 84 0 q40 -22 84 -2 V520 H-30 Z'));
   }, 1);
-  bake(scene, `bg_front_${zone}`, 600, 960, (ctx) => {
-    ctx.translate(30, 0);
+  bake(scene, `bg_front_${zone}`, 600, BG_CROP.front.h, (ctx) => {
+    ctx.translate(30, -BG_CROP.front.y);
     ctx.globalAlpha = 0.9; ctx.fillStyle = z.leaf;
     ctx.fill(new Path2D('M-10 930 q40 -70 96 -54 q-30 30 -48 70 Z'));
     ctx.fill(new Path2D('M550 920 q-44 -66 -98 -44 q30 26 46 66 Z'));

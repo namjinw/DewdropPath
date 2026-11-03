@@ -58,10 +58,13 @@ export default class ResultScene extends Phaser.Scene {
     const my = perfect ? 306 : 252;
     if (perfect) {
       const medal = image(this, 'badge_perfect', 76, 198, 258).setDepth(top + 1).setScale(0);
+      medal.full = 76 / Math.max(medal.width, medal.height); // 이미지는 크기에 맞춘 배율이 기본이라 1 로 돌려놓으면 원본 크기(128px)로 커져 별을 덮는다
       const rb = ribbon(this, 290, 258, t('result.perfect'), { kind: 'gold', size: 26, h: 52, padX: 50 }).setDepth(top).setScale(0);
       this.at(M.resultNewBestAt, () => {
         sfx.perfect();
-        this.tweens.add({ targets: [medal, rb], scale: { from: 0, to: 1.3 }, duration: M.perfectBadge * 0.7, ease: E.perfectBadge, onComplete: () => this.tweens.add({ targets: [medal, rb], scale: 1, duration: M.perfectBadge * 0.3 }) });
+        const pop = (o, full) => this.tweens.add({ targets: o, scale: { from: 0, to: full * 1.3 }, duration: M.perfectBadge * 0.7, ease: E.perfectBadge, onComplete: () => this.tweens.add({ targets: o, scale: full, duration: M.perfectBadge * 0.3 }) });
+        pop(medal, medal.full);
+        pop(rb, 1);
         glow(rb, 'gold');
       });
     }
