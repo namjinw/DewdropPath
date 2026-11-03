@@ -2,3 +2,33 @@
 Thumbs.db
 node_modules/
 .env
+
+# 키·비밀번호·인증서 (광고·배포 계정 정보는 올리지 않는다. 예시 파일만 올린다)
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+
+# 에디터, OS
+.idea/
+.vscode/
+desktop.ini
+
+# 로그, 임시·백업 파일, 테스트 산출물
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+test-results/
+playwright-report/
+
+# 빌드 산출물과 원본 작업 파일 (소스만 올린다: 빌드는 runner/build.mjs 가 dist 를 만든다)
+dist/
+*.zip
+*.psd
+*.blend
+*.kra
