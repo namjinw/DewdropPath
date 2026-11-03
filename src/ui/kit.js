@@ -337,7 +337,14 @@ export function tile(scene, o) {
   c.disabledState = false;
   c.setFace = (hover) => bg.setTexture(faceKey(color, 'square', hover));
   kitInteractive(scene, c, { ...o, sound: o.state === 'locked' ? sfx.blocked : sfx.click });
-  if (o.glowKind) c.glowFx = glow(c, o.glowKind);
+  // 글로우 필터 대신 glow64 그라데이션 이미지를 타일 맨 뒤에 깐다. 필터는 타일마다 렌더 타깃을 매 프레임 다시 그려,
+  // 퍼펙트 타일이 쌓일수록 스테이지 목록이 심하게 느려졌다 (34개에서 프레임당 수 초). 일반 블렌드: 밝은 배경에서 ADD 는 거의 안 보인다
+  if (o.glowKind) {
+    const g = THEME.glow[o.glowKind];
+    const d = size + 18 + g.outerStrength * 6;
+    c.glowFx = scene.add.image(0, 0, 'glow64').setTint(hex(g.color)).setAlpha(0.9).setDisplaySize(d, d);
+    c.addAt(c.glowFx, 0);
+  }
   return c;
 }
 
