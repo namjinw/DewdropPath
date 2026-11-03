@@ -3,7 +3,7 @@
 import { isSfxOn, isMusicOn } from './save.js';
 import { CONFIG } from './config.js';
 
-// 로드할 파일 목록 (assets/audio/sfx/<키>.ogg). 키는 파일 이름이다. manifest.json 의 sfx 와 같아야 한다.
+// 로드할 파일 목록 (assets/audio/sfx/<키>.ogg 와 같은 이름의 .m4a). 키는 파일 이름이다. manifest.json 의 sfx 와 같아야 한다.
 export const SFX_FILES = [
   'slide_ch1', 'slide_ch2', 'slide_ch3', 'slide_ch4', 'slide_ch5',
   'drop', 'blocked', 'chime', 'pleasing-bell', 'bell-ding2', 'pluck', 'complete', 'bong', 'hint',
@@ -11,6 +11,10 @@ export const SFX_FILES = [
   'trying-to-unlock', 'ui-click-1', 'ui-click-2', 'dirt_crumble', 'pot_slide', 'place'
 ];
 export const MUSIC_KEY = 'island';
+
+// 소리 파일 주소 목록. ogg 를 먼저, m4a 를 두 번째로 준다: Phaser 가 브라우저가 재생할 수 있는 첫 파일을 고른다
+// (오래된 iPhone Safari 는 ogg 를 재생하지 못해 m4a 로 넘어간다).
+export const audioUrls = (kind, key) => ['ogg', 'm4a'].map((ext) => `assets/audio/${kind}/${key}.${ext}`);
 
 // 파일마다 녹음 크기가 달라(assets/LICENSES.md 의 평균 dB) 같은 음량으로 틀면 들쭉날쭉하다. 평균 dB 를 기준으로 음량을 맞춘다.
 const MEAN_DB = {
@@ -160,7 +164,7 @@ export function startMusic(scene) {
     if (!game.cache.audio.exists(MUSIC_KEY)) {
       if (musicLoading || !scene) return;
       musicLoading = true;
-      scene.load.audio(MUSIC_KEY, `assets/audio/music/${MUSIC_KEY}.ogg`);
+      scene.load.audio(MUSIC_KEY, audioUrls('music', MUSIC_KEY));
       scene.load.once('complete', () => { musicLoading = false; startMusic(); });
       scene.events.once('shutdown', () => { musicLoading = false; }); // 불러오는 중에 화면이 바뀌면 다음 메뉴에서 다시 시도한다
       scene.load.start();
