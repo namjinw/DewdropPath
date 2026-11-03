@@ -3,7 +3,7 @@
 import { THEME } from '../theme.js';
 import { toOverlay } from './clipview.js';
 import { sfx } from '../audio.js';
-import { ART_SCALE, PILLS, hexNum } from '../art.js';
+import { ART_SCALE, PILLS, hexNum, bakeGlowBlob } from '../art.js';
 import { t } from '../i18n/index.js';
 import { hideAd } from '../ads.js';
 
@@ -38,6 +38,16 @@ export function glowSprite(scene, target, kind = 'gold') {
   if (parent) { s.setPosition(target.x, target.y); parent.addAt(s, parent.getIndex(target)); }
   else { const c = target.getCenter(); s.setPosition(c.x, c.y).setDepth(target.depth - 0.01); }
   return s;
+}
+// 직사각 알약(리본 등)용 글로우를 필터 없이 그린다: 글로우 색 번짐을 구운 텍스처(art.js bakeGlowBlob)를 nineslice 로 늘려 깐다.
+// 컨테이너 안(맨 뒤)에 넣으면 같이 움직이고 커진다. 필터(addGlow)는 오브젝트를 매 프레임 렌더 타깃에 다시 그려, 퍼펙트 결과 화면이 통째로 느려졌다. 콘텐츠 w x h 기준
+export function glowBlob(scene, w, h, kind = 'gold') {
+  const key = bakeGlowBlob(scene, kind);
+  const pad = 24;
+  const sl = 36 * ART_SCALE;
+  const n = scene.add.nineslice(0, 0, key, undefined, (w + pad * 2) * ART_SCALE, (h + pad * 2) * ART_SCALE, sl, sl, sl, sl);
+  n.setScale(1 / ART_SCALE);
+  return n;
 }
 export function shadowFilter(obj, kind = 'ui') {
   if (!filtersOn || !obj || !obj.enableFilters) return obj;

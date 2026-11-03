@@ -87,28 +87,87 @@ export default class PassScene extends Phaser.Scene {
     this.layer = this.add.container(0, 0);
     this.view.add(this.layer);
     this.rowObjs = [];
+    this.rowTex = [];
+    this.events.once('shutdown', () => this.dropRowTextures());
     const lv = passLevel(b);
     for (let l = 1; l <= CONFIG.passLevelCount; l++) this.layer.add(this.makeRow(l, r.x, r.y + (l - 1) * r.step, lv));
     this.view.setContentSize(15 * r.step + 12);
+    this.view.onScroll = () => this.cullRows();
     // 처음에는 받을 수 있는 첫 보상 근처가 보이게
     const claimable = claimableLevels(b);
     const focus = claimable.length ? claimable[0] : Math.min(CONFIG.passLevelCount, lv + 1);
     this.view.setScroll(Math.max(0, (focus - 2) * r.step));
     this.view.enableDrag(r.step);
+    this.cullRows();
+  }
+
+  // 보이는 영역 밖의 줄은 그리지 않는다 (줄 하나가 그리기 호출 10여 개라 15줄을 다 그리면 드래그가 끊겼다)
+  cullRows() {
+    if (!this.view || !this.rowObjs) return;
+    const r = L.rows;
+    const top = this.view.rect.y + this.view.scroll - r.step * 0.5;
+    const bottom = this.view.rect.y + this.view.scroll + this.view.rect.h + r.step * 0.5;
+    for (let l = 1; l <= CONFIG.passLevelCount; l++) {
+      const c = this.rowObjs[l];
+      if (!c) continue;
+      const y = r.y + (l - 1) * r.step;
+      c.setVisible(y + r.h > top && y < bottom);
+    }
   }
 
   // 받은 뒤 줄을 다시 만든다 (스크롤 위치 유지)
   rebuildRows() {
     if (!this.layer) return;
     const keep = this.view.scroll;
-    this.layer.removeAll(true);
-    this.rowObjs = [];
     const r = L.rows;
     const lv = passLevel(this.branch);
-    for (let l = 1; l <= CONFIG.passLevelCount; l++) this.layer.add(this.makeRow(l, r.x, r.y + (l - 1) * r.step, lv));
+    for (let l = 1; l <= CONFIG.passLevelCount; l++) {
+      const old = this.rowObjs[l];
+      if (old && old.sig === this.rowSig(l, lv)) continue;
+      if (old) {
+        if (old.box) this.tweens.killTweensOf(old.box);
+        if (old.btn) old.btn.setPulse(false);
+        this.layer.remove(old, true);
+      }
+      this.layer.add(this.makeRow(l, r.x, r.y + (l - 1) * r.step, lv));
+    }
     this.view.setScroll(keep);
+    this.cullRows();
     this.claimAllBtn.setVisible(claimableLevels(this.branch).length >= 2);
     this.claiming = false;
+  }
+
+  // 줄의 모양을 정하는 상태 (도달 여부, 받음 여부)
+  rowSig(l, lv) { return (l <= lv && this.unlocked ? '1' : '0') + (save.isClaimed(this.branch, l) ? '1' : '0'); }
+
+  dropRowTextures() {
+    if (!this.rowTex) return;
+    for (const k of this.rowTex) { if (this.textures.exists(k)) this.textures.remove(k); }
+    this.rowTex = [];
+  }
+
+  // 줄의 바탕(패널, 단계 원, 이름, 받았음/잠김 표시)을 그림 한 장으로 굽는다: 줄 하나가 그리기 호출 14개 안팎이라 스크롤이 끊겼다.
+  // 굽지 못하면(오류) 원래 오브젝트를 그대로 쓴다. 상자/버튼 모션은 굽지 않고 따로 둔다.
+  bakeRow(cont, l) {
+    const pad = 24;
+    const S = 2;
+    const w = L.rows.w;
+    const h = L.rows.h;
+    const key = `pass_row_${l}`;
+    try {
+      if (this.textures.exists(key)) this.textures.remove(key);
+      const dt = this.textures.addDynamicTexture(key, (w + pad * 2) * S, (h + pad * 2) * S);
+      const ox = cont.x; const oy = cont.y;
+      cont.setPosition(pad * S, pad * S).setScale(S);
+      dt.capture(cont, { transform: 'local' });
+      dt.render();
+      cont.setPosition(ox, oy).setScale(1);
+      this.rowTex.push(key);
+      cont.removeAll(true);
+      const im = this.add.image(0, 0, key).setOrigin(0, 0).setScale(1 / S);
+      im.setPosition(-pad, -pad);
+      cont.add(im);
+    } catch (e) { cont.setPosition(0, 0).setScale(1); /* 굽기에 실패하면 줄 오브젝트를 그대로 둔다 */ }
   }
 
   rewardInfo(rw) {
@@ -136,22 +195,26 @@ export default class PassScene extends Phaser.Scene {
     return im;
   }
 
+  // 줄 = 바뀌지 않는 바탕(base, 그림 한 장으로 구워 둔다) + 받을 수 있는 줄의 움직이는 부분(상자, 보상 그림, 받기 버튼)
   makeRow(l, x, y, lv) {
     const b = this.branch;
     const cont = this.add.container(x, y);
+    const base = this.add.container(0, 0);
+    cont.add(base);
     const reached = l <= lv && this.unlocked;
     const claimed = save.isClaimed(b, l);
     const canClaim = reached && !claimed;
     const rw = passReward(b, l);
     const info = this.rewardInfo(rw);
     const h = L.rows.h;
-    cont.add(panel(this, 0, 0, L.rows.w, h, { flat: true }));
+    base.add(panel(this, 0, 0, L.rows.w, h, { flat: true }));
     // 단계 원: 도달하면 금빛
     const disc = this.add.graphics();
     disc.fillStyle(reached ? 0xFFDB5C : 0xE6EBF0, 1).fillCircle(34, h / 2, 22);
     disc.lineStyle(3, reached ? 0xE2B53A : 0xFFFFFF, 1).strokeCircle(34, h / 2, 22);
-    cont.add(disc);
-    cont.add(text(this, 34, h / 2 - 2, String(l), { size: 22, color: P.ink }));
+    base.add(disc);
+    base.add(text(this, 34, h / 2 - 2, String(l), { size: 22, color: P.ink }));
+    base.add(text(this, 150, h / 2 - 2, info.name, { size: 20, color: P.ink, origin: 0, maxW: 190, minSize: 14 }));
     // 보상 그림
     const art = this.artImage(info, 54);
     if (canClaim) {
@@ -163,11 +226,10 @@ export default class PassScene extends Phaser.Scene {
       cont.box = box; cont.art = art;
     } else {
       art.setPosition(100, h / 2 + 2);
-      cont.add(art);
+      base.add(art);
       if (!reached) art.setAlpha(0.55);
       cont.art = art;
     }
-    cont.add(text(this, 150, h / 2 - 2, info.name, { size: 20, color: P.ink, origin: 0, maxW: 190, minSize: 14 }));
     // 오른쪽: 받기 | 받았어요 | 잠김
     if (canClaim) {
       const btn = button(this, { x: 408, y: h / 2, w: 116, h: 56, variant: 'primary', size: 18, label: t('pass.claim'), onClick: () => this.claim(l, cont), sound: () => {} });
@@ -175,12 +237,14 @@ export default class PassScene extends Phaser.Scene {
       cont.add(btn);
       cont.btn = btn;
     } else if (claimed) {
-      cont.add(image(this, 'ui-blue-icon-checkmark@pastel', 30, 372, h / 2));
-      cont.add(text(this, 392, h / 2 - 2, t('pass.claimed'), { size: 19, color: P.text, origin: 0 }));
+      base.add(image(this, 'ui-blue-icon-checkmark@pastel', 30, 372, h / 2));
+      base.add(text(this, 392, h / 2 - 2, t('pass.claimed'), { size: 19, color: P.text, origin: 0 }));
     } else {
-      cont.add(image(this, 'star_empty', 22, 354, h / 2));
-      cont.add(text(this, 370, h / 2 - 2, this.unlocked ? t('pass.locked', { n: passStarsFor(l) }) : t('pass.locked', { n: passStarsFor(l) }), { size: 16, color: P.textDim, origin: 0, maxW: 106, minSize: 11 }));
+      base.add(image(this, 'star_empty', 22, 354, h / 2));
+      base.add(text(this, 370, h / 2 - 2, t('pass.locked', { n: passStarsFor(l) }), { size: 16, color: P.textDim, origin: 0, maxW: 106, minSize: 11 }));
     }
+    this.bakeRow(base, l);
+    cont.sig = this.rowSig(l, lv);
     this.rowObjs[l] = cont;
     return cont;
   }
