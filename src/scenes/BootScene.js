@@ -26,6 +26,7 @@ export default class BootScene extends Phaser.Scene {
     bakeIcons(this);
     bakeParticles(this);
     bakePills(this);
+    if (window.__dewGuard) window.__dewGuard.ready(); // 여기까지 오면 시작에 성공한 것이다: 시작 실패 안내(src/guard.js)를 끈다
     this.scene.start(TEST_START || 'Menu', TEST_START ? TEST_ARGS : undefined);
   }
 }
