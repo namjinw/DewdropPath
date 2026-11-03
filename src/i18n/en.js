@@ -263,7 +263,7 @@ export default {
   "common.ok": "OK",
   "common.close": "Close",
   "common.loading": "Loading",
-  "credits.licenseNote": "See assets/LICENSES.md for details",
+  "credits.licenseNote": "Phaser (MIT), Jua font (OFL), AI-generated images. Full notices: THIRD-PARTY-NOTICES.txt (tap to open)",
   "menu.version": "v1",
   "play.undoTip": "Undo goes back one move",
   "play.hintOn": "Try this way",

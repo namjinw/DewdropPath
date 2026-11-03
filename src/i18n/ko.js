@@ -263,7 +263,7 @@ export default {
   "common.ok": "확인",
   "common.close": "닫기",
   "common.loading": "불러오는 중",
-  "credits.licenseNote": "자세한 내용은 assets/LICENSES.md",
+  "credits.licenseNote": "Phaser(MIT)·글꼴 Jua(OFL)·AI 생성 이미지 사용. 전체 고지: THIRD-PARTY-NOTICES.txt (눌러서 열기)",
   "menu.version": "v1",
   "play.undoTip": "되돌리기로 한 수 전으로",
   "play.hintOn": "이쪽으로 가 봐요",
