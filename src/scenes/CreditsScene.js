@@ -36,6 +36,19 @@ export default class CreditsScene extends Phaser.Scene {
       list.setFontSize(size);
       note.setFontSize(size);
     }
+    // 안내 문구를 누르면 제3자 고지 전문을 새 탭으로 연다 (설정 화면의 개인정보 버튼과 같은 방식. 글자 크기가 정해진 뒤에 누르는 영역을 만든다)
+    note.setInteractive({ useHandCursor: true });
+    note.on('pointerup', () => {
+      try {
+        const a = document.createElement('a');
+        a.href = 'THIRD-PARTY-NOTICES.txt';
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (e) { /* 무시 */ }
+    });
     this.input.keyboard.on('keydown-ESC', () => bar.back.trigger());
   }
 }
