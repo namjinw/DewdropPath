@@ -3,7 +3,7 @@ import { THEME } from '../theme.js';
 import { CONFIG } from '../config.js';
 import { t } from '../i18n/index.js';
 import { Backdrop } from '../ui/bg.js';
-import { button, panel, text, image, chip, ribbon, toast, badge, progressBar, go, fadeIn, DEPTH, nudge, glow } from '../ui/kit.js';
+import { button, panel, text, image, chip, ribbon, toast, badge, progressBar, go, fadeIn, DEPTH, nudge, glowBlob } from '../ui/kit.js';
 import { branchOf, localOf, labelOf, stageById } from '../stages.js';
 import { claimableCount, nextStageId, passStarsToNext, branchStars, passLevel, allStagesCleared } from '../progress.js';
 import { sfx } from '../audio.js';
@@ -33,6 +33,7 @@ export default class ResultScene extends Phaser.Scene {
     const rec = d.rec || {};
     const perfect = stars === 3;
     this.timers = [];
+    this.sparkEm = null;
     new Backdrop(this, { zone: b, clouds: [[24, 640, 110], [400, 660, 96]] });
     const D = DEPTH.objects;
     panel(this, 30, 36, 480, 648).setDepth(D);
@@ -65,7 +66,7 @@ export default class ResultScene extends Phaser.Scene {
         const pop = (o, full) => this.tweens.add({ targets: o, scale: { from: 0, to: full * 1.3 }, duration: M.perfectBadge * 0.7, ease: E.perfectBadge, onComplete: () => this.tweens.add({ targets: o, scale: full, duration: M.perfectBadge * 0.3 }) });
         pop(medal, medal.full);
         pop(rb, 1);
-        glow(rb, 'gold');
+        rb.addAt(glowBlob(this, rb.w, rb.h, 'gold'), 0); // 퍼펙트 글로우: 필터 대신 이미지 (필터는 매 프레임 렌더 타깃을 거쳐 이 화면이 렉걸렸다)
       });
     }
     this.movesText = text(this, 270, my + 20, t('result.moves', { k: moves }), { size: 44, color: P.text }).setDepth(top);

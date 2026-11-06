@@ -58,6 +58,7 @@ export class ClipView {
     this.scroll = Math.max(0, Math.min(this.max, s));
     if (this.axis === 'y') this.cam.setScroll(this.rect.x, this.rect.y + this.scroll);
     else this.cam.setScroll(this.rect.x + this.scroll, this.rect.y);
+    if (this.onScroll) this.onScroll(this.scroll);
     return this.scroll;
   }
   // 가장 가까운 칸 높이 배수로 부드럽게 맞춘다
